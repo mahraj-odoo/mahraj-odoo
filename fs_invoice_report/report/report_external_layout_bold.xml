@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="fs_external_layout_bold">
+        <t t-if="not o" t-set="o" t-value="doc"/>
+        <t t-if="not company">
+            <!-- Multicompany -->
+            <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="else">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+        </t>
+
+        <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
+            <div class="o_clean_header">
+            <div class="row">
+                <div class="col-6">
+                    <h2>Tax Invoice</h2>
+                </div>
+                <div class="col-5 offset-1" name="company_address">
+                    <div class="d-flex justify-content-end">
+                        <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                    </div>
+                    <div>
+                        <strong>
+                            <p class="text-right m-0 p-0" t-if="company.name"><span t-field="company.name"/></p>
+                        </strong>
+                        <p class="text-right m-0 p-0" t-if="forced_vat or company.vat">
+                            <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                            <span t-if="forced_vat" t-esc="forced_vat"/>
+                            <span t-else="" t-field="company.vat"/>
+                        </p>
+                        <p t-if="company.phone" class="text-right m-0 p-0">Tel: <span class="o_force_ltr" t-field="company.phone"/></p>
+                        <p t-if="company.email" class="text-right m-0 p-0"><span t-field="company.email"/></p>
+                        <p t-if="company.website" class="text-right m-0 p-0"><span t-field="company.website"/></p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+
+        <div t-attf-class="article o_report_layout_bold o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' }});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <t t-call="web.address_layout"/>
+            <t t-out="0"/>
+        </div>
+
+        <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout">
+            <div class="row">
+                <div class="col-4">
+                    <span t-field="company.report_footer"/>
+                </div>
+                <div class="col-4">
+                    <span t-if="company.company_details" t-field="company.company_details"/>
+                </div>
+                <div class="col-3">
+                    <h5 class="mt0 mb0" t-field="company.report_header"/>
+                </div>
+                <div class="col-1">
+                    <ul t-if="report_type == 'pdf'" class="list-inline pagenumber float-right text-center">
+                        <li class="list-inline-item"><strong><span class="page"/></strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

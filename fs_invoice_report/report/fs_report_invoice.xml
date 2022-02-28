@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="fs_report_invoice_document">
+        <t t-call="fs_invoice_report.fs_external_layout_bold">
+            <t t-set="o" t-value="o.with_context(lang=lang)" />
+            <div class="page" style="padding-top:60px">
+                <div class="row py-2">
+                    <style>
+                        .o_report_layout_bold table tbody tr:last-child td {
+                            border-bottom: none;
+                        }
+                    </style>
+                    <div class="col-4">
+                        <p class="p-0 m-0">To,</p>
+                        <p class="p-0 m-0"><b><span class="p-0 m-0" t-field="o.partner_id"/></b></p>
+						<p class="p-0 m-0" t-if="o.partner_id.street" t-field="o.partner_id.street" />
+						<p class="p-0 m-0" t-if="o.partner_id.street2" t-field="o.partner_id.street2" />
+						<p class="p-0 m-0" t-if="o.partner_id.city" t-field="o.partner_id.city" />
+						<p class="p-0 m-0" t-if="o.partner_id.state_id" t-field="o.partner_id.state_id" />
+						<p class="p-0 m-0" t-if="o.partner_id.country_id" t-field="o.partner_id.country_id" />
+						<p class="p-0 m-0" t-if="o.partner_id.vat" t-field="o.partner_id.vat" />
+                    </div>
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <p class="p-0 m-0"> <b>Date:</b> <span t-esc="o.invoice_date"/></p>
+                        <p class="p-0 m-0"> <b>Due Date:</b> <span t-esc="o.invoice_date_due"/></p>
+                        <p class="p-0 m-0"> <b>Invoice:</b> <span t-esc="o.name"/></p>
+                        <p class="p-0 m-0"> <b>LPO:</b> <span t-esc="o.invoice_date"/></p>
+                    </div>
+                </div>
+                <table class="pt-2" width="100%">
+                    <thead>
+                        <tr style="border-top: hidden; border-bottom: 2px solid black;">
+                            <th>Product/Services</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Unit Price</th>
+                            <th>Total(AED)</th>
+                        </tr>
+                    </thead>
+                    <tbody style="border-bottom: hidden;">
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <tr style="border-bottom: 2px solid black;">
+                                <td><span t-field="line.product_id"/></td>
+                                <td><span t-esc="o.get_html(line.name)"/></td>
+                                <td><span t-esc="line.quantity"/></td>
+                                <td><span t-esc="line.product_id.uom_name"/></td>
+                                <td><span t-esc="line.price_unit"/></td>
+                                <td><span t-esc="line.price_subtotal"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-8">
+                    </div>
+                    <div class="col-4 py-2">
+                        <t t-set="tax_totals" t-value="json.loads(o.tax_totals_json)"/>
+                       <!--  <p class="p-0 m-0 text-right py-1" style="border-top:2px solid black;"> <b>Sub Total:</b> <span t-esc="o.amount_untaxed"/></p>
+                        <p class="p-0 m-0 text-right py-1"> <b>Sub Total:</b> <span t-esc="o.amount_total"/></p> -->
+                        <t t-set="discount" t-value="o.get_discount()"/>
+                        <table width="100%">
+                            <tbody style="border-bottom: hidden;">
+                                <tr style="border-top: 2px solid black;">
+                                    <td><strong><span>Sub Total:</span></strong></td>
+                                    <td><span t-field="o.amount_untaxed"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong><span>Discount:</span></strong></td>
+                                    <td style="border-bottom: 2px solid black;"><t t-esc="discount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong><span>Sub Total:</span></strong></td>
+                                    <td><t t-esc="o.amount_untaxed - discount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                </tr>
+                                <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
+                                    <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
+                                    <t t-foreach="tax_totals['groups_by_subtotal'][subtotal_to_show]" t-as="amount_by_group">
+                                        <tr>
+                                            <t t-if="len(tax_totals['groups_by_subtotal'][subtotal_to_show]) > 1">
+                                                <td>
+                                                    <span t-esc="amount_by_group['tax_group_name']"/>
+                                                    <span class="text-nowrap"> on
+                                                        <t t-esc="amount_by_group['formatted_tax_group_base_amount']"/>
+                                                    </span>
+                                                </td>
+                                                <td class="o_price_total" style="border-bottom: 2px solid black;">
+                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_tax_group_amount']"/>
+                                                </td>
+                                            </t>
+                                            <t t-else="">
+                                                <td><span class="text-nowrap" t-esc="amount_by_group['tax_group_name']"/></td>
+                                                <td class="o_price_total" style="border-bottom: 2px solid black;">
+                                                    <span class="text-nowrap" t-esc="amount_by_group['formatted_tax_group_amount']" />
+                                                </td>
+                                            </t>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <tr class="o_total">
+                                    <td style="border-top: hidden!important;"><strong>Total</strong></td>
+                                    <td>
+                                        <t t-set="total" t-value="o.amount_total - discount"/>
+                                        <span t-esc="total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- <p class="p-0 m-0 text-right"> <b>Discount:</b> <span t-esc="o.amount_total"/></p> -->
+                    </div>
+                </div>
+                <p t-esc="o.narration"/>
+                <div class="pt-2" style="width:100%;">
+                    <p class="p-2 m-0 border"> <b>Total Amount In Words(AED):</b> <span t-esc="o.convert_money_to_word(o.amount_total)"/></p>
+                    <div class="ml-1 my-2 row">
+                        <div class="col-6 p-0">
+                            <p class="p-0 m-0"> <b>Payment Terms:</b> </p>
+                            <p t-esc="o.invoice_date" class="border p-2"/>
+                            <div class="border p-2">
+                                <t t-set="sale_id" t-value="o.env['sale.order'].search([('invoice_ids', 'in', o.ids)], limit=1)"/>
+                                <p class="p-0 m-0"> <b>Project Name:</b> <t t-esc="sale_id.analytic_account_id.name"/></p>
+                                <p class="p-0 m-0"> <b>Contact Person:</b> <span t-field="o.invoice_user_id"/></p>
+                            </div>
+                            <div class="border p-2">
+                                <p><b>Customer's Seal and Signature</b></p>
+                                <br/><br/>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 border">
+                                <p class="p-0 m-0"> <b>Beneficiary Name: </b> Mahraj Tents and Events Services LLC</p>
+                                <p class="p-0 m-0"> <b>Bank: </b>Abu Dhabi Islamic Bank(ADIB)</p>
+                                <p class="p-0 m-0"> <b>Account No: </b>17166445</p>
+                                <p class="p-0 m-0"> <b>Swift Code: </b>ABDIAEAD</p>
+                                <p class="p-0 m-0"> <b>iban No: </b>AE920500000000017166445</p>
+                            </div>
+                            <div class="p-2 border">
+                                <p><b>Authorised Signatory</b></p>
+                                <br/>
+                                <h4><b>Bless Penaflor</b></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="fs_report_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-call="fs_invoice_report.fs_report_invoice_document" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_form_inherit_html" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.html</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name' and @widget='section_and_note_text']" position='attributes'>
+                <attribute name="widget">html</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="account_invoice_filter_inherit_account_3way_match" model="ir.ui.view">
+        <field name="name">account.invoice.select.inherit.account_3way_match</field>
+        <field name="mode">primary</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='late']" position='after'>
+                <separator/>
+                <filter name="bills_to_pay" string="Bills to Pay" domain="['&amp;', '&amp;', ('state', '=', 'posted'), ('payment_state', 'not in', ('paid', 'in_payment')), '|', ('invoice_date_due', '&lt;', time.strftime('%%Y-%%m-%%d')), ('release_to_pay','=', 'yes')]"/>
+                <filter name="exception" string="Bills in Exception" domain="[('release_to_pay','=', 'exception')]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record> -->
+
+</odoo>
